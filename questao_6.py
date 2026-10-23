@@ -2,162 +2,169 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
-VERMELHO = "red"
-PRETO = "black"
+RED, BLACK = 0, 1
 
 
 class No:
-    def __init__(self, valor):
-        self.valor = valor
-        self.cor = VERMELHO
-        self.esquerda = None
-        self.direita = None
+    def __init__(self, chave):
+        self.chave = chave
+        self.cor = RED
+        self.esq = None
+        self.dir = None
         self.pai = None
 
 
-class RubroNegra:
+class ArvoreRubroNegra:
     def __init__(self):
-        self.raiz = None
+        self.NIL = No(None)
+        self.NIL.cor = BLACK
+        self.NIL.esq = self.NIL
+        self.NIL.dir = self.NIL
 
-    def cor(self, no):
-        if no is None:
-            return PRETO
-        return no.cor
+        self.raiz = self.NIL
 
-    def rotacao_esquerda(self, x):
-        y = x.direita
-        x.direita = y.esquerda
+    def _rot_esq(self, x):
+        y = x.dir
+        x.dir = y.esq
 
-        if y.esquerda is not None:
-            y.esquerda.pai = x
+        if y.esq != self.NIL:
+            y.esq.pai = x
 
         y.pai = x.pai
 
         if x.pai is None:
             self.raiz = y
 
-        elif x == x.pai.esquerda:
-            x.pai.esquerda = y
+        elif x == x.pai.esq:
+            x.pai.esq = y
 
         else:
-            x.pai.direita = y
+            x.pai.dir = y
 
-        y.esquerda = x
+        y.esq = x
         x.pai = y
 
-    def rotacao_direita(self, y):
-        x = y.esquerda
-        y.esquerda = x.direita
+    def _rot_dir(self, y):
+        x = y.esq
+        y.esq = x.dir
 
-        if x.direita is not None:
-            x.direita.pai = y
+        if x.dir != self.NIL:
+            x.dir.pai = y
 
         x.pai = y.pai
 
         if y.pai is None:
             self.raiz = x
 
-        elif y == y.pai.direita:
-            y.pai.direita = x
+        elif y == y.pai.dir:
+            y.pai.dir = x
 
         else:
-            y.pai.esquerda = x
+            y.pai.esq = x
 
-        x.direita = y
+        x.dir = y
         y.pai = x
 
-    def inserir(self, valor):
-        novo = No(valor)
+    def inserir(self, chave):
+        novo = No(chave)
+        novo.esq = novo.dir = self.NIL
 
         pai = None
         atual = self.raiz
 
-        while atual is not None:
+        while atual != self.NIL:
             pai = atual
 
-            if valor < atual.valor:
-                atual = atual.esquerda
+            if chave < atual.chave:
+                atual = atual.esq
             else:
-                atual = atual.direita
+                atual = atual.dir
 
         novo.pai = pai
 
         if pai is None:
             self.raiz = novo
 
-        elif valor < pai.valor:
-            pai.esquerda = novo
+        elif chave < pai.chave:
+            pai.esq = novo
 
         else:
-            pai.direita = novo
+            pai.dir = novo
 
-        self.corrigir(novo)
+        self._corrigir_insercao(novo)
 
-    def corrigir(self, no):
-        while (
-            no != self.raiz
-            and self.cor(no.pai) == VERMELHO
-        ):
+    def _corrigir_insercao(self, z):
+        while z.pai and z.pai.cor == RED:
 
-            avo = no.pai.pai
+            avo = z.pai.pai
 
-            if no.pai == avo.esquerda:
+            if z.pai == avo.esq:
 
-                tio = avo.direita
+                tio = avo.dir
 
-                if self.cor(tio) == VERMELHO:
-                    no.pai.cor = PRETO
-                    tio.cor = PRETO
-                    avo.cor = VERMELHO
-                    no = avo
+                if tio.cor == RED:
+                    z.pai.cor = BLACK
+                    tio.cor = BLACK
+                    avo.cor = RED
+                    z = avo
 
                 else:
-                    if no == no.pai.direita:
-                        no = no.pai
-                        self.rotacao_esquerda(no)
+                    if z == z.pai.dir:
+                        z = z.pai
+                        self._rot_esq(z)
 
-                    no.pai.cor = PRETO
-                    avo.cor = VERMELHO
-                    self.rotacao_direita(avo)
+                    z.pai.cor = BLACK
+                    avo.cor = RED
+                    self._rot_dir(avo)
 
             else:
 
-                tio = avo.esquerda
+                tio = avo.esq
 
-                if self.cor(tio) == VERMELHO:
-                    no.pai.cor = PRETO
-                    tio.cor = PRETO
-                    avo.cor = VERMELHO
-                    no = avo
+                if tio.cor == RED:
+                    z.pai.cor = BLACK
+                    tio.cor = BLACK
+                    avo.cor = RED
+                    z = avo
 
                 else:
-                    if no == no.pai.esquerda:
-                        no = no.pai
-                        self.rotacao_direita(no)
+                    if z == z.pai.esq:
+                        z = z.pai
+                        self._rot_dir(z)
 
-                    no.pai.cor = PRETO
-                    avo.cor = VERMELHO
-                    self.rotacao_esquerda(avo)
+                    z.pai.cor = BLACK
+                    avo.cor = RED
+                    self._rot_esq(avo)
 
-        self.raiz.cor = PRETO
+        self.raiz.cor = BLACK
 
 
-def montar_grafo(no, grafo, pos, cores, x=0, y=0, distancia=6):
-    if no is None:
+def montar_grafo(
+    no,
+    NIL,
+    grafo,
+    pos,
+    cores,
+    x=0,
+    y=0,
+    distancia=6
+):
+    if no == NIL:
         return
 
-    grafo.add_node(no.valor)
-    pos[no.valor] = (x, y)
-    cores[no.valor] = no.cor
+    grafo.add_node(no.chave)
+    pos[no.chave] = (x, y)
 
-    if no.esquerda is not None:
-        grafo.add_edge(
-            no.valor,
-            no.esquerda.valor
-        )
+    cores[no.chave] = (
+        "red" if no.cor == RED else "black"
+    )
+
+    if no.esq != NIL:
+        grafo.add_edge(no.chave, no.esq.chave)
 
         montar_grafo(
-            no.esquerda,
+            no.esq,
+            NIL,
             grafo,
             pos,
             cores,
@@ -166,14 +173,12 @@ def montar_grafo(no, grafo, pos, cores, x=0, y=0, distancia=6):
             distancia / 2
         )
 
-    if no.direita is not None:
-        grafo.add_edge(
-            no.valor,
-            no.direita.valor
-        )
+    if no.dir != NIL:
+        grafo.add_edge(no.chave, no.dir.chave)
 
         montar_grafo(
-            no.direita,
+            no.dir,
+            NIL,
             grafo,
             pos,
             cores,
@@ -189,10 +194,10 @@ valores = [
     5, 15, 25, 35, 45
 ]
 
-arvore = RubroNegra()
+arvore = ArvoreRubroNegra()
 
-for valor in valores:
-    arvore.inserir(valor)
+for chave in valores:
+    arvore.inserir(chave)
 
 
 grafo = nx.DiGraph()
@@ -201,6 +206,7 @@ cores = {}
 
 montar_grafo(
     arvore.raiz,
+    arvore.NIL,
     grafo,
     pos,
     cores
@@ -225,8 +231,5 @@ nx.draw(
     arrows=False
 )
 
-plt.title(
-    "Questão 6 - Escalonador - Árvore Rubro-Negra"
-)
-
+plt.title("Questão 6 - Escalonador - Rubro-Negra")
 plt.show()
