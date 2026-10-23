@@ -66,20 +66,20 @@ class AVL:
             - self.altura(raiz.direita)
         )
 
-        # Caso esquerda-esquerda
+        
         if balanceamento > 1 and valor < raiz.esquerda.valor:
             return self.rotacao_direita(raiz)
 
-        # Caso direita-direita
+       
         if balanceamento < -1 and valor > raiz.direita.valor:
             return self.rotacao_esquerda(raiz)
 
-        # Caso esquerda-direita
+        
         if balanceamento > 1 and valor > raiz.esquerda.valor:
             raiz.esquerda = self.rotacao_esquerda(raiz.esquerda)
             return self.rotacao_direita(raiz)
 
-        # Caso direita-esquerda
+        
         if balanceamento < -1 and valor < raiz.direita.valor:
             raiz.direita = self.rotacao_direita(raiz.direita)
             return self.rotacao_esquerda(raiz)
