@@ -3,94 +3,90 @@ import matplotlib.pyplot as plt
 
 
 class No:
-    def __init__(self, valor):
-        self.valor = valor
+    def __init__(self, v):
+        self.valor = v
         self.esquerda = None
         self.direita = None
         self.altura = 1
 
 
 class AVL:
-    def altura(self, no):
-        if no is None:
-            return 0
-        return no.altura
+    def __init__(self):
+        self.raiz = None
 
-    def atualizar_altura(self, no):
+    def _h(self, no):
+        return no.altura if no else 0
+
+    def _fb(self, no):
+        return self._h(no.direita) - self._h(no.esquerda)
+
+    def _atualiza_altura(self, no):
         no.altura = 1 + max(
-            self.altura(no.esquerda),
-            self.altura(no.direita)
+            self._h(no.esquerda),
+            self._h(no.direita)
         )
 
-    def rotacao_direita(self, y):
+    def _rotacao_direita(self, y):
         x = y.esquerda
-        t2 = x.direita
 
+        y.esquerda = x.direita
         x.direita = y
-        y.esquerda = t2
 
-        self.atualizar_altura(y)
-        self.atualizar_altura(x)
+        self._atualiza_altura(y)
+        self._atualiza_altura(x)
 
         return x
 
-    def rotacao_esquerda(self, x):
+    def _rotacao_esquerda(self, x):
         y = x.direita
-        t2 = y.esquerda
 
+        x.direita = y.esquerda
         y.esquerda = x
-        x.direita = t2
 
-        self.atualizar_altura(x)
-        self.atualizar_altura(y)
+        self._atualiza_altura(x)
+        self._atualiza_altura(y)
 
         return y
 
-    def inserir(self, raiz, valor):
-        if raiz is None:
-            return No(valor)
+    def inserir(self, v):
+        self.raiz = self._inserir(self.raiz, v)
 
-        if valor < raiz.valor:
-            raiz.esquerda = self.inserir(
-                raiz.esquerda,
-                valor
-            )
+    def _inserir(self, no, v):
+        if no is None:
+            return No(v)
 
-        elif valor > raiz.valor:
-            raiz.direita = self.inserir(
-                raiz.direita,
-                valor
-            )
+        if v < no.valor:
+            no.esquerda = self._inserir(no.esquerda, v)
+
+        elif v > no.valor:
+            no.direita = self._inserir(no.direita, v)
 
         else:
-            return raiz
+            return no
 
-        self.atualizar_altura(raiz)
+        self._atualiza_altura(no)
 
-        balanceamento = (
-            self.altura(raiz.esquerda)
-            - self.altura(raiz.direita)
-        )
+        fb = self._fb(no)
 
-        if balanceamento > 1 and valor < raiz.esquerda.valor:
-            return self.rotacao_direita(raiz)
+        if fb < -1 and v < no.esquerda.valor:
+            return self._rotacao_direita(no)
 
-        if balanceamento < -1 and valor > raiz.direita.valor:
-            return self.rotacao_esquerda(raiz)
+        if fb > 1 and v > no.direita.valor:
+            return self._rotacao_esquerda(no)
 
-        if balanceamento > 1 and valor > raiz.esquerda.valor:
-            raiz.esquerda = self.rotacao_esquerda(
-                raiz.esquerda
+        if fb < -1 and v > no.esquerda.valor:
+            no.esquerda = self._rotacao_esquerda(
+                no.esquerda
             )
-            return self.rotacao_direita(raiz)
+            return self._rotacao_direita(no)
 
-        if balanceamento < -1 and valor < raiz.direita.valor:
-            raiz.direita = self.rotacao_direita(
-                raiz.direita
+        if fb > 1 and v < no.direita.valor:
+            no.direita = self._rotacao_direita(
+                no.direita
             )
-            return self.rotacao_esquerda(raiz)
+            return self._rotacao_esquerda(no)
 
-        return raiz
+        return no
 
 
 def montar_grafo(no, grafo, pos, x=0, y=0, distancia=6):
@@ -100,11 +96,8 @@ def montar_grafo(no, grafo, pos, x=0, y=0, distancia=6):
     grafo.add_node(no.valor)
     pos[no.valor] = (x, y)
 
-    if no.esquerda is not None:
-        grafo.add_edge(
-            no.valor,
-            no.esquerda.valor
-        )
+    if no.esquerda:
+        grafo.add_edge(no.valor, no.esquerda.valor)
 
         montar_grafo(
             no.esquerda,
@@ -115,11 +108,8 @@ def montar_grafo(no, grafo, pos, x=0, y=0, distancia=6):
             distancia / 2
         )
 
-    if no.direita is not None:
-        grafo.add_edge(
-            no.valor,
-            no.direita.valor
-        )
+    if no.direita:
+        grafo.add_edge(no.valor, no.direita.valor)
 
         montar_grafo(
             no.direita,
@@ -138,20 +128,16 @@ valores = [
 ]
 
 arvore = AVL()
-raiz = None
 
-for valor in valores:
-    raiz = arvore.inserir(
-        raiz,
-        valor
-    )
+for v in valores:
+    arvore.inserir(v)
 
 
 grafo = nx.DiGraph()
 pos = {}
 
 montar_grafo(
-    raiz,
+    arvore.raiz,
     grafo,
     pos
 )
@@ -168,8 +154,5 @@ nx.draw(
     arrows=False
 )
 
-plt.title(
-    "Questão 3 - Tabela de Símbolos - Árvore AVL"
-)
-
+plt.title("Questão 3 - Tabela de Símbolos - AVL")
 plt.show()
