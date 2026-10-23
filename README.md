@@ -1,10 +1,10 @@
 # Árvores Balanceadas
 
-Este projeto foi feito para resolver 6 questões sobre **Árvore AVL** e **Árvore Rubro-Negra**.
+Este projeto contém a resolução de 6 questões usando **Árvore AVL** e **Árvore Rubro-Negra**.
 
-Os códigos foram feitos em Python e usam as bibliotecas `networkx` e `matplotlib` para mostrar a árvore na tela.
+Os códigos foram feitos em Python com base nas aulas de AVL e Rubro-Negra.
 
-## Instalação
+Para mostrar as árvores, foram usadas as bibliotecas:
 
 ```bash
 pip install matplotlib networkx
@@ -20,21 +20,19 @@ Valores:
 
 **Resposta: AVL**
 
-Escolhi AVL porque nessa situação acontecem muitas buscas e poucas inserções.
+A AVL foi escolhida porque o sistema realiza muitas buscas e poucas inserções.
 
-A AVL mantém a árvore mais balanceada, ajudando nas consultas.
+Como os valores chegam em ordem crescente, uma árvore comum poderia ficar desbalanceada.
 
-A árvore fica assim:
+A AVL usa o fator de balanceamento e rotações para manter a árvore equilibrada.
+
+Na aula, o fator de balanceamento é calculado por:
 
 ```text
-              80
-           /      \
-         40        120
-        /  \       /  \
-      20   60    100  140
-     / \   / \   / \   / \
-   10 30 50 70 90 110 130 150
+FB = altura(direita) - altura(esquerda)
 ```
+
+A árvore final fica balanceada mesmo com os valores inseridos em ordem crescente.
 
 ---
 
@@ -48,11 +46,11 @@ Valores:
 
 **Resposta: Rubro-Negra**
 
-Escolhi Rubro-Negra porque o sistema faz muitas inserções.
+Foi escolhida porque o sistema realiza muitas inserções.
 
-Ela consegue manter a árvore balanceada sem precisar fazer tantas mudanças na estrutura.
+Na Rubro-Negra, cada novo nó nasce vermelho e a árvore realiza recolorações ou rotações quando necessário.
 
-No código, os nós também aparecem nas cores vermelho e preto.
+A raiz sempre termina preta.
 
 ---
 
@@ -66,21 +64,17 @@ Valores:
 
 **Resposta: AVL**
 
-Escolhi AVL porque depois que a árvore é criada ela vai ser consultada muitas vezes.
+A AVL foi escolhida porque depois da criação da árvore existem muitas consultas.
 
-Como a AVL mantém a árvore bem balanceada, as buscas ficam mais rápidas.
+Como a AVL mantém a árvore bem balanceada, as buscas continuam eficientes.
 
-A árvore fica assim:
+A aula mostra que a AVL mantém o fator de balanceamento de todos os nós entre:
 
 ```text
-          50
-        /    \
-      30      70
-     /  \    /  \
-   20   40  60  80
-  / \   /   / \
-10 25 35   55 65
+-1, 0 e +1
 ```
+
+
 
 ---
 
@@ -94,9 +88,23 @@ Valores:
 
 **Resposta: Rubro-Negra**
 
-Escolhi Rubro-Negra porque existem muitas inserções e remoções de sessões.
+Foi escolhida porque existem muitas inserções e remoções de sessões.
 
-Como os dados mudam bastante, essa árvore é mais indicada para esse tipo de situação.
+A Rubro-Negra é indicada para estruturas que sofrem muitas alterações.
+
+Ela usa as cores dos nós para controlar o balanceamento.
+
+O nó possui:
+
+```text
+chave
+cor
+esq
+dir
+pai
+```
+
+
 
 ---
 
@@ -110,11 +118,15 @@ Valores:
 
 **Resposta: AVL**
 
-Escolhi AVL porque os valores chegam em ordem crescente.
+Os valores chegam completamente ordenados.
 
-Sem balanceamento, a árvore poderia ficar parecida com uma lista.
+Em uma árvore comum, isso poderia formar uma estrutura parecida com uma lista.
 
-Com a AVL, ela fica balanceada assim:
+A AVL realiza rotações automaticamente e mantém a árvore balanceada.
+
+Essa mesma sequência aparece como exercício na aula de AVL.
+
+A árvore final fica:
 
 ```text
         4
@@ -123,8 +135,6 @@ Com a AVL, ela fica balanceada assim:
     / \   / \
    1   3 5   7
 ```
-
-Isso deixa a busca mais rápida.
 
 ---
 
@@ -138,6 +148,49 @@ Valores:
 
 **Resposta: Rubro-Negra**
 
-Escolhi Rubro-Negra porque o sistema faz muitas alterações por segundo.
+Foi escolhida porque o sistema realiza muitas alterações por segundo.
 
-Como existem muitas inserções e mudanças na árvore, a Rubro-Negra é mais indicada para esse caso.
+A Rubro-Negra trabalha bem com muitas inserções porque seu balanceamento é menos rígido que o da AVL.
+
+Durante a inserção:
+
+```text
+Pai preto
+→ nenhuma correção
+
+Pai vermelho + tio vermelho
+→ recoloração
+
+Pai vermelho + tio preto
+→ rotação
+```
+
+
+
+---
+
+## Visualização
+
+As árvores são exibidas usando:
+
+```python
+import networkx as nx
+import matplotlib.pyplot as plt
+```
+
+O `networkx` monta a estrutura da árvore e o `matplotlib` mostra o resultado na tela.
+
+Os códigos não usam `print()` para mostrar a árvore e não criam arquivos PNG.
+
+A visualização é aberta com:
+
+```python
+plt.show()
+```
+
+Nas árvores Rubro-Negra:
+
+- vermelho representa um nó rubro;
+- preto representa um nó negro.
+
+Nas árvores AVL, os nós são reorganizados automaticamente através das rotações LL, RR, LR e RL.
